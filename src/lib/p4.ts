@@ -1,15 +1,8 @@
-import { exec, ExecResult } from './utils.ts'
+import { exec } from './utils.ts'
 import { fs } from '../deps.ts'
+import { ExecResult, P4ClientInterface, P4Trigger } from './types.ts'
 
-type P4Trigger = {
-	index: number
-	name: string
-	type: string
-	path: string
-	command: string
-}
-
-export class PerforceClient {
+export class P4Client implements P4ClientInterface {
 	private p4Path: string
 	private cwd: string | URL
 	private config: Record<string, string> = {}
@@ -74,6 +67,16 @@ export class PerforceClient {
 		})
 	}
 
+	openPipe(command: string, args: string[] = []) {
+		const fullArgs = [command, ...args]
+		const pipe = new Deno.Command(this.p4Path, {
+			args: fullArgs,
+			env: this.config,
+			stdin: 'piped',
+		})
+		return pipe.spawn()
+	}
+
 	parseTriggersOutput(output: string): P4Trigger[] {
 		const triggers: P4Trigger[] = []
 		const lines = output.split('\n')
@@ -93,5 +96,34 @@ export class PerforceClient {
 		})
 
 		return triggers
+	}
+
+	serializeTriggers(triggers: P4Trigger[]): string {
+		return triggers.map((trigger) => {
+			return `${trigger.name} ${trigger.type} ${trigger.path} "${trigger.command}"`
+		}).join('\n\t')
+	}
+
+	buildTriggerTable(triggers: P4Trigger[]): string {
+		return `
+Triggers:
+	${this.serializeTriggers(triggers)}
+`.trim()
+	}
+
+	async saveTriggerTable(triggers: P4Trigger[]): Promise<P4Trigger[]> {
+		// build new the trigger table
+		const table = this.buildTriggerTable(triggers)
+
+		// write the new table back to p4
+		const pipe = this.openPipe('triggers', ['-i'])
+		const writer = pipe.stdin.getWriter()
+		await writer.write(new TextEncoder().encode(table))
+		await writer.close()
+
+		// read the updated triggers back
+		const cmd = await this.runCommandZ(`triggers`, ['-o'])
+		const newTriggers = this.parseTriggersOutput(cmd.output)
+		return newTriggers
 	}
 }
