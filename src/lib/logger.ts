@@ -29,7 +29,7 @@ class Logger {
 	private commandContext = null as string | null
 	private sessionId = null as string | null
 	private logToFile = true
-	private logLevel = LogLevel.DEBUG
+	private logLevel = LogLevel.INFO
 	private logDir = createConfigDirSync()
 	private writeQueue: Promise<void>[] = []
 
@@ -49,9 +49,11 @@ class Logger {
 		this.logLevel = level
 	}
 
-	private formatMessage(level: LogLevel, message: any) {
+	private formatMessage(level: LogLevel, args: any[]) {
 		const timestamp = new Date().toISOString()
-		const messageStr = typeof message === 'object' ? `\n${Deno.inspect(message, { colors: true })}` : message
+		const messageStr = args.map((arg) => typeof arg === 'object' ? `${Deno.inspect(arg, { colors: true })}` : arg).join(
+			' ',
+		)
 		let levelStr
 		switch (level) {
 			case LogLevel.INFO:
@@ -93,23 +95,23 @@ class Logger {
 		return level >= this.logLevel
 	}
 
-	info(message: any) {
+	info(...args: any[]) {
 		if (!this.shouldLog(LogLevel.INFO)) return
-		const formatted = this.formatMessage(LogLevel.INFO, message)
+		const formatted = this.formatMessage(LogLevel.INFO, args)
 		console.log(formatted)
 		this.writeToFile(formatted)
 	}
 
-	error(message: any) {
+	error(...args: any[]) {
 		if (!this.shouldLog(LogLevel.ERROR)) return
-		const formatted = this.formatMessage(LogLevel.ERROR, message)
+		const formatted = this.formatMessage(LogLevel.ERROR, args)
 		console.error(formatted)
 		this.writeToFile(formatted)
 	}
 
-	debug(message: any) {
+	debug(...args: any[]) {
 		if (!this.shouldLog(LogLevel.DEBUG)) return
-		const formatted = this.formatMessage(LogLevel.DEBUG, message)
+		const formatted = this.formatMessage(LogLevel.DEBUG, args)
 		console.log(formatted)
 		this.writeToFile(formatted)
 	}

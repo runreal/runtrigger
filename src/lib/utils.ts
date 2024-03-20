@@ -1,11 +1,5 @@
 import { mergeReadableStreams } from '/deps.ts'
-
-export interface ExecResult {
-	success: boolean
-	code: number
-	signal: Deno.Signal | null
-	output: string
-}
+import { ExecResult } from '/lib/types.ts'
 
 export async function exec(
 	cmd: string,
