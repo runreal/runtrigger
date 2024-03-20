@@ -1,10 +1,4 @@
-export interface Config {
-    name: string;
-    type: string;
-    path: string;
-    command: string;
-    args: string[];
-}
+import { Config } from './types.ts'
 
 export const config: Config = {
     name: 'test-triggerxxx',
@@ -14,12 +8,12 @@ export const config: Config = {
     args: ['--debug']
 }
 
-export const main = async (args: any, ctx: any) => {
-    console.log(Deno.env.get('SOME_VAR'))
-    console.log(Deno.env.get('TEST_VAR'))
+export const main = async (args: typeof config.args, ctx: any) => {
+    ctx.log.info(Deno.env.get('SOME_VAR'))
+    ctx.log.info(Deno.env.get('TEST_VAR'))
     // do your trigger stuff here
-    console.log('running test trigger')
-    console.log(args)
-    console.log(ctx)
+    ctx.log.info('running test trigger')
+    ctx.log.info(args)
+    ctx.log.info(ctx)
     return { success: true}
 }

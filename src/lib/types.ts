@@ -5,3 +5,4 @@ export interface Config {
     command: string;
     args: string[];
 }
+

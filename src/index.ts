@@ -6,7 +6,7 @@ import { dynamicImport } from 'https://deno.land/x/import/mod.ts';
 import { dotenv } from '/deps.ts'
 import { path } from '/deps.ts'
 import dedent from "npm:dedent";
-
+import { logger } from './lib/logger.ts';
 
 await new Command()
 	.name('triggerr')
@@ -155,15 +155,18 @@ await new Command()
 		const envPath = path.fromFileUrl(`${path.dirname(scriptPath)}/.env`)
 	
 		const env = await dotenv.load({
-			envPath, examplePath: `${envPath}.example`, export: true
+			envPath,
+			examplePath: `${envPath}.example`,
+			export: true
 		})
 		
+		logger.setContext(config.name)
 		// TODO(warman): properly setup ctx with logger and other goodies
 		const ctx = {
 			name: config.name,
 			type: config.type,
 			path: config.path,
-			log: console.log.bind(console),
+			log: logger,
 			p4: new PerforceClient(),
 		}
 
