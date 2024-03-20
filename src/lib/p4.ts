@@ -1,8 +1,8 @@
 import { exec, ExecResult } from './utils.ts'
 import { fs } from '../deps.ts'
 
-type P4Trigger = {
-	index: number
+export type P4Trigger = {
+	index?: number
 	name: string
 	type: string
 	path: string
@@ -74,6 +74,16 @@ export class PerforceClient {
 		})
 	}
 
+	openPipe(command: string, args: string[] = []) {
+		const fullArgs = [command, ...args]
+		const pipe = new Deno.Command(this.p4Path, {
+			args: fullArgs,
+			env: this.config,
+			stdin: 'piped'
+		})
+		return pipe.spawn()
+	}
+
 	parseTriggersOutput(output: string): P4Trigger[] {
 		const triggers: P4Trigger[] = []
 		const lines = output.split('\n')
@@ -93,5 +103,18 @@ export class PerforceClient {
 		})
 
 		return triggers
+	}
+
+	serializeTriggers(triggers: P4Trigger[]): string {
+		return triggers.map(trigger => {
+			return `${trigger.name} ${trigger.type} ${trigger.path} "${trigger.command}"`;
+		}).join('\n\t');
+	}
+
+	buildTriggerTable(triggers: P4Trigger[]): string {
+		return `
+Triggers:
+	${this.serializeTriggers(triggers)}
+`.trim()
 	}
 }

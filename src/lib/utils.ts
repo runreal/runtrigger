@@ -75,3 +75,25 @@ export function execSync(
 	const { success, code, signal } = process
 	return { success, code, signal, output }
 }
+
+export function createConfigDirSync(): string {
+	const homeDir = Deno.build.os === 'windows' ? Deno.env.get('USERPROFILE') : Deno.env.get('HOME')
+	const configDir = `${homeDir}/.triggerr`
+	Deno.mkdirSync(configDir, { recursive: true })
+	return configDir
+}
+
+export class DefaultMap<K, V> extends Map<K, V> {
+	constructor(private defaultFn: (key: K) => V, entries?: readonly (readonly [K, V])[] | null) {
+		super(entries)
+	}
+
+	get(key: K): V {
+		if (!super.has(key)) {
+			super.set(key, this.defaultFn(key))
+		}
+		return super.get(key)!
+	}
+}
+
+export const getRandomInt = (max: number) => Math.floor(Math.random() * max)
