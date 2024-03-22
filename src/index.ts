@@ -28,14 +28,12 @@ await new Command()
 		await Deno.copyFile('./src/lib/types.ts', `${path}/types.ts`)
 		// create trigger from template
 		await Deno.writeTextFile(`${path}/example-trigger.ts`, template.trim())
-
 	})
 	.command('add', 'add a trigger')
 	.arguments('<script:file>')
 	.option('-e, --executable', 'setup the trigger as an executable')
-	.option('-p, --platform <platform:string>', 'platform to setup the executable as', { default: Deno.build.os })
 	.option('-d, --deno-binary <deno:file>', 'path to the deno binary if not using executable', { default: 'deno' })
-	.action(async ({ executable, platform, denoBinary }, script) => {
+	.action(async ({ executable, denoBinary }, script) => {
 		if (script.startsWith('file://')) {
 			script = import.meta.resolve(script)
 		} else {
@@ -48,13 +46,8 @@ await new Command()
 		const triggers = p4.parseTriggersOutput(cmd.output)
 
 		let triggerCommand = ''
-		// TODO(warman): setup step to actually compile the binary if it doesn't exist
 		if (executable) {
-			if (platform === 'windows') {
-				triggerCommand = `./triggerr.exe run ${script} ${config.args.join(' ')}`
-			} else {
-				triggerCommand = `./triggerr run ${script} ${config.args.join(' ')}`
-			}
+			triggerCommand = `triggerr run ${script} ${config.args.join(' ')}`
 		} else {
 			// We want to run this cli as the entry point
 			const cliPath = path.fromFileUrl(import.meta.url)
@@ -83,9 +76,8 @@ await new Command()
 	.command('update', 'update a trigger')
 	.arguments('<script:string>')
 	.option('-e, --executable', 'setup the trigger as an executable')
-	.option('-p, --platform <platform:string>', 'platform to setup the executable as', { default: Deno.build.os })
 	.option('-d, --deno-binary <deno:file>', 'path to the deno binary if not using executable', { default: 'deno' })
-	.action(async ({ executable, platform, denoBinary }, script) => {
+	.action(async ({ executable, denoBinary }, script) => {
 		if (script.startsWith('file://')) {
 			script = import.meta.resolve(script)
 		} else {
@@ -103,13 +95,8 @@ await new Command()
 		}
 
 		let triggerCommand = ''
-		// TODO(warman): setup step to actually compile the binary if it doesn't exist
 		if (executable) {
-			if (platform === 'windows') {
-				triggerCommand = `./triggerr.exe run ${script} ${config.args.join(' ')}`
-			} else {
-				triggerCommand = `./triggerr run ${script} ${config.args.join(' ')}`
-			}
+			triggerCommand = `triggerr run ${script} ${config.args.join(' ')}`
 		} else {
 			// We want to run this cli as the entry point
 			const cliPath = path.fromFileUrl(import.meta.url)
