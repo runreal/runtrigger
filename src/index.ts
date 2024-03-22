@@ -139,7 +139,7 @@ await new Command()
 		const updatedTable = await p4.saveTriggerTable(triggers)
 		renderTriggerTable(updatedTable)
 	})
-	.command('exec', 'execute a trigger')
+	.command('exec', 'execute a trigger with optional arguments')
 	.arguments('<script:file> [...args]')
 	.stopEarly()
 	.action(async (_, script, ...args: Array<string>) => {
