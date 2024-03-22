@@ -1,7 +1,7 @@
 import { TriggerConfig, TriggerContext, TriggerFn } from './types.ts'
 
 export const config: TriggerConfig = {
-    name: 'slack-trigger',
+    name: 'slack-triggerx',
     type: ['change-commit'],
     path: ['//Engine/...', '//ProjectLyra/...'],
     args: ['%changelist%']
@@ -36,9 +36,11 @@ export const main: TriggerFn = async (args: string[], ctx: TriggerContext) => {
     const message = `New commit detected: \nChangelist: ${changelist}\nDescription:\n${description}`;
     const res = await postToSlack(message)
     if (!res.ok) {
-        ctx.log.error('Error posting to Slack:', res.statusText)
+        const error = `Error posting to Slack: ${res.statusText}`
+        ctx.log.error(error)
+        return { error }
     }
-    const result = await res.json()
+    const result = await res.text()
     return { result }
 }
 

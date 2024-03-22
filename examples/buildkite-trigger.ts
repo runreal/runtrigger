@@ -45,7 +45,9 @@ export const main: TriggerFn = async (args: string[], ctx: TriggerContext) => {
     ctx.log.debug('Buildkite payload:', buildkitePayload)
     const res = await postToBuildkite(pipeline, buildkitePayload)
     if (!res.ok) {
-        ctx.log.error('Error posting to Buildkite:', res.statusText)
+        const error = `Error posting to Slack: ${res.statusText}`
+        ctx.log.error(error)
+        return { error }
     }
     const result = await res.json()
     return { result }
