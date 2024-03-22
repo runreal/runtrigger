@@ -1,9 +1,4 @@
 {
-	"imports": {
-		"/": "./src/",
-		"./": "./",
-		"std/": "https://deno.land/std@0.220.1/"
-	},
 	"tasks": {
 		"start": "deno run -A --watch=src src/index.ts",
 		"run": "deno run -A src/index.ts",

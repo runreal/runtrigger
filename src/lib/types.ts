@@ -6,7 +6,7 @@ export interface ExecResult {
 }
 
 export type P4Trigger = {
-	index?: number
+	index: number
 	name: string
 	type: string
 	path: string
@@ -14,8 +14,8 @@ export type P4Trigger = {
 }
 
 export interface P4ClientInterface {
-	runCommand: (command: string, args: string[], options: { quiet: boolean }) => Promise<ExecResult>
-	runCommandZ: (command: string, args: string[], options: { quiet: boolean }) => Promise<ExecResult>
+	runCommand: (command: string, args: string[], options?: { quiet: boolean }) => Promise<ExecResult>
+	runCommandZ: (command: string, args: string[], options?: { quiet: boolean }) => Promise<ExecResult>
 	openPipe: (command: string, args: string[]) => Deno.ChildProcess
 	parseTriggersOutput: (output: string) => P4Trigger[]
 	serializeTriggers: (triggers: P4Trigger[]) => string
@@ -24,8 +24,8 @@ export interface P4ClientInterface {
 
 export interface TriggerConfig {
 	name: string
-	type: string
-	path: string
+	type: string[]
+	path: string[]
 	args: string[]
 }
 

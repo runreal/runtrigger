@@ -1,28 +1,21 @@
 import { VERSION } from './version.ts'
-import { Command, dotenv, dynamicImport, path, Row, Table } from '/deps.ts'
+import { Command, dotenv, path } from './deps.ts'
 import { logger } from './lib/logger.ts'
 import { P4Client } from './lib/p4.ts'
 import { template } from './lib/template.ts'
+import { renderTriggerTable } from './lib/utils.ts'
 import { P4Trigger, TriggerConfig, TriggerContext, TriggerFn } from './lib/types.ts'
 
 await new Command()
 	.name('triggerr')
 	.version(VERSION)
 	.description('the perforce trigger manager')
-	.globalOption('-d, --debug', 'Enable debug output.')
 	.command('list', 'list current triggers')
 	.action(async () => {
 		const p4 = new P4Client()
 		const cmd = await p4.runCommandZ(`triggers`, ['-o'])
 		const triggers = p4.parseTriggersOutput(cmd.output)
-
-		new Table()
-			.header(Row.from(['Name', 'Type', 'Path', 'Command']).border())
-			.body(
-				triggers.map((trigger) => new Row(trigger.name, trigger.type, trigger.path, trigger.command)),
-			)
-			.border(true)
-			.render()
+		renderTriggerTable(triggers)
 	})
 	.command('init', 'initialize a new triggerr project')
 	.option('-p, --path <path:file>', 'Path to initialize', { default: path.join(Deno.cwd(), 'triggers/') })
@@ -35,96 +28,129 @@ await new Command()
 		await Deno.copyFile('./src/lib/types.ts', `${path}/types.ts`)
 		// create trigger from template
 		await Deno.writeTextFile(`${path}/example-trigger.ts`, template.trim())
+
 	})
-	.command('install', 'install a trigger')
-	.arguments('<script:string>')
+	.command('add', 'add a trigger')
+	.arguments('<script:file>')
 	.option('-e, --executable', 'setup the trigger as an executable')
 	.option('-p, --platform <platform:string>', 'platform to setup the executable as', { default: Deno.build.os })
-	.option('-d, --deno-binary <deno:string>', 'path to the deno binary', { default: 'deno' })
-	.option('-u, --update', 'update the trigger if it already exists')
-	.action(async ({ executable, platform, denoBinary, update }, script) => {
-		const scriptPath = import.meta.resolve(script)
-		const { config } = await dynamicImport(scriptPath)
+	.option('-d, --deno-binary <deno:file>', 'path to the deno binary if not using executable', { default: 'deno' })
+	.action(async ({ executable, platform, denoBinary }, script) => {
+		const scriptPath = path.toFileUrl(path.resolve(script)).toString()
+		const { config } : { config: TriggerConfig } = await import(scriptPath)
+
+		const p4 = new P4Client()
+		const cmd = await p4.runCommandZ(`triggers`, ['-o'])
+		const triggers = p4.parseTriggersOutput(cmd.output)
 
 		let triggerCommand = ''
 		// TODO(warman): setup step to actually compile the binary if it doesn't exist
 		if (executable) {
 			if (platform === 'windows') {
-				triggerCommand = `./triggerr.exe run ${scriptPath}`
+				triggerCommand = `./triggerr.exe run ${scriptPath} ${config.args.join(' ')}`
 			} else {
-				triggerCommand = `./triggerr run ${scriptPath}`
+				triggerCommand = `./triggerr run ${scriptPath} ${config.args.join(' ')}`
 			}
 		} else {
 			// We want to run this cli as the entry point
 			const cliPath = path.fromFileUrl(import.meta.url)
-			triggerCommand = `${denoBinary} run -A ${cliPath} exec ${scriptPath}`
+			triggerCommand = `${denoBinary} run -A ${cliPath} exec ${scriptPath} ${config.args.join(' ')}`
 		}
-		const trigger: P4Trigger = {
-			name: config.name,
-			type: config.type,
-			path: config.path,
-			command: triggerCommand,
-		}
+
+		// Create a trigger for each type and path
+		const newTriggers: P4Trigger[] = []
+		config.type.map((type) => {
+			config.path.map((path) => {
+				const newTrigger: P4Trigger = {
+					index: triggers.length,
+					name: config.name,
+					type: type,
+					path: path,
+					command: triggerCommand,
+				}
+				newTriggers.push(newTrigger)
+			})
+		})
+
+		triggers.push(...newTriggers)
+		const updatedTable = await p4.saveTriggerTable(triggers)
+		renderTriggerTable(updatedTable)
+	})
+	.command('update', 'update a trigger')
+	.arguments('<script:string>')
+	.option('-e, --executable', 'setup the trigger as an executable')
+	.option('-p, --platform <platform:string>', 'platform to setup the executable as', { default: Deno.build.os })
+	.option('-d, --deno-binary <deno:file>', 'path to the deno binary if not using executable', { default: 'deno' })
+	.action(async ({ executable, platform, denoBinary }, script) => {
+		const scriptPath = path.toFileUrl(path.resolve(script)).toString()
+		const { config } : { config: TriggerConfig } = await import(scriptPath)
 
 		const p4 = new P4Client()
 		const cmd = await p4.runCommandZ(`triggers`, ['-o'])
 		const triggers = p4.parseTriggersOutput(cmd.output)
-		const exists = triggers.find((t) => t.name === config.name)
-		if (exists) {
-			if (!update) {
-				console.error('trigger already exists')
-				return
+
+		if (triggers.filter((trigger) => trigger.name === config.name).length === 0) {
+			console.error('Trigger not found.')
+			return
+		}
+
+		let triggerCommand = ''
+		// TODO(warman): setup step to actually compile the binary if it doesn't exist
+		if (executable) {
+			if (platform === 'windows') {
+				triggerCommand = `./triggerr.exe run ${scriptPath} ${config.args.join(' ')}`
 			} else {
-				const index = triggers.findIndex((t) => t.name === config.name)
-				triggers[index] = {
-					...triggers[index],
-					...trigger,
-				}
+				triggerCommand = `./triggerr run ${scriptPath} ${config.args.join(' ')}`
 			}
 		} else {
-			triggers.push(trigger)
+			// We want to run this cli as the entry point
+			const cliPath = path.fromFileUrl(import.meta.url)
+			triggerCommand = `${denoBinary} run -A ${cliPath} exec ${scriptPath} ${config.args.join(' ')}`
 		}
+		// Create a trigger for each type and path
+		const newTriggers: P4Trigger[] = []
+		config.type.map((type) => {
+			config.path.map((path) => {
+				const newTrigger: P4Trigger = {
+					index: triggers.length,
+					name: config.name,
+					type: type,
+					path: path,
+					command: triggerCommand,
+				}
+				newTriggers.push(newTrigger)
+			})
+		})
+		// Remove the old triggers
+		const updatedTriggers = triggers.filter((trigger) => trigger.name !== config.name)
+		updatedTriggers.push(...newTriggers)
 
-		const newTriggers = await p4.saveTriggerTable(triggers)
-		new Table()
-			.header(Row.from(['Name', 'Type', 'Path', 'Command']).border())
-			.body(
-				newTriggers.map((trigger) => new Row(trigger.name, trigger.type, trigger.path, trigger.command)),
-			)
-			.border(true)
-			.render()
+		const updatedTable = await p4.saveTriggerTable(updatedTriggers)
+		renderTriggerTable(updatedTable)
 	})
 	.command('rm', 'remove a trigger')
-	.arguments('<trigger-name:string>')
-	.action(async (_, triggerName) => {
+	.arguments('<trigger-index:number>')
+	.action(async (_, triggerIndex) => {
 		const p4 = new P4Client()
 		const cmd = await p4.runCommandZ(`triggers`, ['-o'])
 		const triggers = p4.parseTriggersOutput(cmd.output)
-		const exists = triggers.find((t) => t.name === triggerName)
-		if (!exists) {
-			console.log(`${triggerName} not found`)
+		const trigger = triggers[triggerIndex]
+		if (!trigger) {
+			console.error('Trigger not found.')
 			return
-		} else {
-			const index = triggers.findIndex((t) => t.name === triggerName)
-			triggers.splice(index, 1)
 		}
+		triggers.splice(triggerIndex, 1)
 
-		const newTriggers = await p4.saveTriggerTable(triggers)
-		new Table()
-			.header(Row.from(['Name', 'Type', 'Path', 'Command']).border())
-			.body(
-				newTriggers.map((trigger) => new Row(trigger.name, trigger.type, trigger.path, trigger.command)),
-			)
-			.border(true)
-			.render()
+		const updatedTable = await p4.saveTriggerTable(triggers)
+		renderTriggerTable(updatedTable)
 	})
 	.command('exec', 'execute a trigger')
-	.arguments('<script:string> [...args]')
+	.arguments('<script:file> [...args]')
 	.stopEarly()
 	.action(async (_, script, ...args: Array<string>) => {
 		// import.meta.resolve will return a file:/// url needed for dynamic import
-		const scriptPath = import.meta.resolve(script)
-		const { main, config }: { main: TriggerFn; config: TriggerConfig } = await dynamicImport(scriptPath)
+		const scriptPath = path.toFileUrl(path.resolve(script)).toString()
+		const { main, config }: { main: TriggerFn; config: TriggerConfig } = await import(scriptPath)
 
 		const envPath = path.fromFileUrl(`${path.dirname(scriptPath)}/.env`)
 		await dotenv.load({
@@ -133,7 +159,10 @@ await new Command()
 			export: true,
 		})
 
+		const now = new Date()
+		logger.setSessionId(`${config.name}-${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`)
 		logger.setContext(config.name)
+		logger.setLogDir(path.join(path.dirname(path.resolve(script)), 'logs'))
 
 		const ctx: TriggerContext = {
 			config,
@@ -146,9 +175,9 @@ await new Command()
 			if (error) {
 				logger.error(error.message)
 			}
-			logger.info(`trigger executed successfully`)
+			logger.info(`Trigger executed successfully.`)
 			if (result) {
-				logger.info('trigger result:', result)
+				logger.info('Trigger result:', result)
 			}
 		} catch (e) {
 			logger.error(e.message)

@@ -1,5 +1,5 @@
-import { mergeReadableStreams } from '/deps.ts'
-import { ExecResult } from '/lib/types.ts'
+import { mergeReadableStreams, Row, Table } from '../deps.ts'
+import { ExecResult, P4Trigger } from './types.ts'
 
 export async function exec(
 	cmd: string,
@@ -70,13 +70,6 @@ export function execSync(
 	return { success, code, signal, output }
 }
 
-export function createConfigDirSync(): string {
-	const homeDir = Deno.build.os === 'windows' ? Deno.env.get('USERPROFILE') : Deno.env.get('HOME')
-	const configDir = `${homeDir}/.triggerr`
-	Deno.mkdirSync(configDir, { recursive: true })
-	return configDir
-}
-
 export class DefaultMap<K, V> extends Map<K, V> {
 	constructor(private defaultFn: (key: K) => V, entries?: readonly (readonly [K, V])[] | null) {
 		super(entries)
@@ -91,3 +84,13 @@ export class DefaultMap<K, V> extends Map<K, V> {
 }
 
 export const getRandomInt = (max: number) => Math.floor(Math.random() * max)
+
+export function renderTriggerTable(triggers: P4Trigger[]): void {
+	new Table()
+		.header(Row.from(['Index', 'Name', 'Type', 'Path', 'Command']).border())
+		.body(
+			triggers.map((trigger) => new Row(trigger.index.toString(), trigger.name, trigger.type, trigger.path, trigger.command)),
+		)
+		.border(true)
+		.render()
+}

@@ -1,5 +1,5 @@
-import { fmt } from '/deps.ts'
-import { createConfigDirSync, DefaultMap, getRandomInt } from '/lib/utils.ts'
+import { fmt } from '../deps.ts'
+import { DefaultMap, getRandomInt } from '../lib/utils.ts'
 
 export enum LogLevel {
 	DEBUG = 'DEBUG',
@@ -29,8 +29,8 @@ class Logger {
 	private commandContext = null as string | null
 	private sessionId = null as string | null
 	private logToFile = true
-	private logLevel = LogLevel.INFO
-	private logDir = createConfigDirSync()
+	private logLevel = LogLevel.DEBUG
+	private logDir = null as string | null
 	private writeQueue: Promise<void>[] = []
 
 	setContext(context: string) {
@@ -39,6 +39,12 @@ class Logger {
 
 	setSessionId(id: string) {
 		this.sessionId = id
+	}
+
+	setLogDir(dir: string) {
+		this.logDir = dir
+		const p = Deno.mkdir(dir, { recursive: true }).catch((e) => {})
+		this.writeQueue.push(p)
 	}
 
 	enableFileLogging(enable: boolean) {
@@ -78,7 +84,7 @@ class Logger {
 	}
 
 	private writeToFile(message: string) {
-		if (this.logToFile && this.sessionId) {
+		if (this.logToFile && this.sessionId && this.logDir) {
 			const file = `${this.logDir}/${this.sessionId}.log`
 			const msg = `${fmt.stripAnsiCode(message)}\n`
 			const p = Deno.writeTextFile(file, msg, { append: true }).catch((e) => {})
