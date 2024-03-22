@@ -36,8 +36,12 @@ await new Command()
 	.option('-p, --platform <platform:string>', 'platform to setup the executable as', { default: Deno.build.os })
 	.option('-d, --deno-binary <deno:file>', 'path to the deno binary if not using executable', { default: 'deno' })
 	.action(async ({ executable, platform, denoBinary }, script) => {
-		const scriptPath = path.toFileUrl(path.resolve(script)).toString()
-		const { config } : { config: TriggerConfig } = await import(scriptPath)
+		if (script.startsWith('file://')) {
+			script = import.meta.resolve(script)
+		} else {
+			script = path.toFileUrl(path.resolve(script)).toString()	
+		}
+		const { config }: { main: TriggerFn; config: TriggerConfig } = await import(script)
 
 		const p4 = new P4Client()
 		const cmd = await p4.runCommandZ(`triggers`, ['-o'])
@@ -47,14 +51,14 @@ await new Command()
 		// TODO(warman): setup step to actually compile the binary if it doesn't exist
 		if (executable) {
 			if (platform === 'windows') {
-				triggerCommand = `./triggerr.exe run ${scriptPath} ${config.args.join(' ')}`
+				triggerCommand = `./triggerr.exe run ${script} ${config.args.join(' ')}`
 			} else {
-				triggerCommand = `./triggerr run ${scriptPath} ${config.args.join(' ')}`
+				triggerCommand = `./triggerr run ${script} ${config.args.join(' ')}`
 			}
 		} else {
 			// We want to run this cli as the entry point
 			const cliPath = path.fromFileUrl(import.meta.url)
-			triggerCommand = `${denoBinary} run -A ${cliPath} exec ${scriptPath} ${config.args.join(' ')}`
+			triggerCommand = `${denoBinary} run -A ${cliPath} exec ${script} ${config.args.join(' ')}`
 		}
 
 		// Create a trigger for each type and path
@@ -82,8 +86,12 @@ await new Command()
 	.option('-p, --platform <platform:string>', 'platform to setup the executable as', { default: Deno.build.os })
 	.option('-d, --deno-binary <deno:file>', 'path to the deno binary if not using executable', { default: 'deno' })
 	.action(async ({ executable, platform, denoBinary }, script) => {
-		const scriptPath = path.toFileUrl(path.resolve(script)).toString()
-		const { config } : { config: TriggerConfig } = await import(scriptPath)
+		if (script.startsWith('file://')) {
+			script = import.meta.resolve(script)
+		} else {
+			script = path.toFileUrl(path.resolve(script)).toString()	
+		}
+		const { config }: { main: TriggerFn; config: TriggerConfig } = await import(script)
 
 		const p4 = new P4Client()
 		const cmd = await p4.runCommandZ(`triggers`, ['-o'])
@@ -98,14 +106,14 @@ await new Command()
 		// TODO(warman): setup step to actually compile the binary if it doesn't exist
 		if (executable) {
 			if (platform === 'windows') {
-				triggerCommand = `./triggerr.exe run ${scriptPath} ${config.args.join(' ')}`
+				triggerCommand = `./triggerr.exe run ${script} ${config.args.join(' ')}`
 			} else {
-				triggerCommand = `./triggerr run ${scriptPath} ${config.args.join(' ')}`
+				triggerCommand = `./triggerr run ${script} ${config.args.join(' ')}`
 			}
 		} else {
 			// We want to run this cli as the entry point
 			const cliPath = path.fromFileUrl(import.meta.url)
-			triggerCommand = `${denoBinary} run -A ${cliPath} exec ${scriptPath} ${config.args.join(' ')}`
+			triggerCommand = `${denoBinary} run -A ${cliPath} exec ${script} ${config.args.join(' ')}`
 		}
 		// Create a trigger for each type and path
 		const newTriggers: P4Trigger[] = []
@@ -148,11 +156,14 @@ await new Command()
 	.arguments('<script:file> [...args]')
 	.stopEarly()
 	.action(async (_, script, ...args: Array<string>) => {
-		// import.meta.resolve will return a file:/// url needed for dynamic import
-		const scriptPath = path.toFileUrl(path.resolve(script)).toString()
-		const { main, config }: { main: TriggerFn; config: TriggerConfig } = await import(scriptPath)
+		if (script.startsWith('file://')) {
+			script = import.meta.resolve(script)
+		} else {
+			script = path.toFileUrl(path.resolve(script)).toString()	
+		}
+		const { main, config }: { main: TriggerFn; config: TriggerConfig } = await import(script)
 
-		const envPath = path.fromFileUrl(`${path.dirname(scriptPath)}/.env`)
+		const envPath = path.fromFileUrl(`${path.dirname(script)}/.env`)
 		await dotenv.load({
 			envPath,
 			examplePath: `${envPath}.example`,
@@ -162,7 +173,7 @@ await new Command()
 		const now = new Date()
 		logger.setSessionId(`${config.name}-${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`)
 		logger.setContext(config.name)
-		logger.setLogDir(path.join(path.dirname(path.resolve(script)), 'logs'))
+		logger.setLogDir(path.join(path.dirname(path.fromFileUrl(script)), 'logs'))
 
 		const ctx: TriggerContext = {
 			config,
