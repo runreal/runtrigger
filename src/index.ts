@@ -47,7 +47,7 @@ await new Command()
 
 		let triggerCommand = ''
 		if (executable) {
-			triggerCommand = `triggerr run ${script} ${config.args.join(' ')}`
+			triggerCommand = `triggerr exec ${script} ${config.args.join(' ')}`
 		} else {
 			// We want to run this cli as the entry point
 			const cliPath = path.fromFileUrl(import.meta.url)
@@ -96,7 +96,7 @@ await new Command()
 
 		let triggerCommand = ''
 		if (executable) {
-			triggerCommand = `triggerr run ${script} ${config.args.join(' ')}`
+			triggerCommand = `triggerr exec ${script} ${config.args.join(' ')}`
 		} else {
 			// We want to run this cli as the entry point
 			const cliPath = path.fromFileUrl(import.meta.url)
