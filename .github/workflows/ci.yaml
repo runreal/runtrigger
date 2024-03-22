@@ -38,15 +38,6 @@ jobs:
         - name: Deno Info
           run: deno info src/index.ts
 
-        - name: Deno Compile [windows]
-          run: deno task compile-win
-
-        - name: Deno Compile [macos]
-          run: deno task compile-macos
-
-        - name: Deno Compile [linux]
-          run: deno task compile-linux
-
         - name: Cache Deno dependencies 
           uses: actions/cache@v3
           with:
