@@ -9,9 +9,9 @@
 ⚠️ Currently alpha - use at your own risk. ⚠️
 
 ## Example
-`triggerr init` to initialize an empty `triggerr` script and add your logic and optionally configure any environment variables in a `.env` file.
+`triggerr init` to initialize an empty `triggerr` script:
 
-```
+```ts
 import { TriggerConfig, TriggerContext, TriggerFn } from './types.ts'
 
 // this configuration is converted into the Perforce trigger definitions
@@ -42,7 +42,7 @@ export const main: TriggerFn = async (args: string[], ctx: TriggerContext) => {
 
 `triggerr add` to add the script to the Perforce configuration:
 
-```
+```sh
 ┌───────┬─────────────────┬───────────────┬───────────────────┬─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ Index │ Name            │ Type          │ Path              │ Command                                                                                                                                 │
 ├───────┼─────────────────┼───────────────┼───────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
@@ -61,11 +61,11 @@ See `/examples` for some additional example scripts.
 Make sure you have [Deno installed](https://docs.deno.com/runtime/manual/getting_started/installation).
 
 ### From GitHub
-```
+```sh
 deno install --name triggerr --force --allow-net --allow-read --allow-env --allow-run --allow-write --allow-sys https://raw.githubusercontent.com/runreal/triggerr/main/src/index.ts
 ```
 ### From Source
-```
+```sh
 git clone https://github.com/runreal/triggerr
 deno install --name triggerr --force --allow-net --allow-read --allow-env --allow-run --allow-write --allow-sys src/index.ts
 ```
