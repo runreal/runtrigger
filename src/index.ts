@@ -7,7 +7,7 @@ import { renderTriggerTable } from './lib/utils.ts'
 import { P4Trigger, TriggerConfig, TriggerContext, TriggerFn } from './lib/types.ts'
 
 await new Command()
-	.name('triggerr')
+	.name('runtrigger')
 	.version(VERSION)
 	.description('the perforce trigger manager')
 	.command('list', 'list current triggers')
@@ -17,7 +17,7 @@ await new Command()
 		const triggers = p4.parseTriggersOutput(cmd.output)
 		renderTriggerTable(triggers)
 	})
-	.command('init', 'initialize a new triggerr project')
+	.command('init', 'initialize a new runtrigger project')
 	.option('-p, --path <path:file>', 'Path to initialize', { default: path.join(Deno.cwd(), 'triggers/') })
 	.action(async ({ path }) => {
 		// create the directory
@@ -47,7 +47,7 @@ await new Command()
 
 		let triggerCommand = ''
 		if (executable) {
-			triggerCommand = `triggerr exec ${script} ${config.args.join(' ')}`
+			triggerCommand = `runtrigger exec ${script} ${config.args.join(' ')}`
 		} else {
 			// We want to run this cli as the entry point
 			const cliPath = path.fromFileUrl(import.meta.url)
@@ -96,7 +96,7 @@ await new Command()
 
 		let triggerCommand = ''
 		if (executable) {
-			triggerCommand = `triggerr exec ${script} ${config.args.join(' ')}`
+			triggerCommand = `runtrigger exec ${script} ${config.args.join(' ')}`
 		} else {
 			// We want to run this cli as the entry point
 			const cliPath = path.fromFileUrl(import.meta.url)

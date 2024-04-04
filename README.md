@@ -1,5 +1,5 @@
-# triggerr
-`triggerr` is a command-line tool for managing and creating Perforce triggers written in TypeScript and running on Deno.
+# runtrigger
+`runtrigger` is a command-line tool for managing and creating Perforce triggers written in TypeScript and running on Deno.
 
 - Write and configure triggers in Typescript
 - Manage triggers from simple CLI interface
@@ -9,7 +9,7 @@
 ⚠️ Currently alpha - use at your own risk. ⚠️
 
 ## Example
-`triggerr init` to initialize an empty `triggerr` script:
+`runtrigger init` to initialize an empty `runtrigger` script:
 
 ```ts
 import { TriggerConfig, TriggerContext, TriggerFn } from './types.ts'
@@ -40,20 +40,20 @@ export const main: TriggerFn = async (args: string[], ctx: TriggerContext) => {
 }
 ```
 
-`triggerr add` to add the script to the Perforce configuration:
+`runtrigger add` to add the script to the Perforce configuration:
 
 ```sh
 ┌───────┬─────────────────┬───────────────┬───────────────────┬─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ Index │ Name            │ Type          │ Path              │ Command                                                                                                                                 │
 ├───────┼─────────────────┼───────────────┼───────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ 0     │ example-trigger │ change-commit │ //Engine/...      │ triggerr exec file:///C:/P4/triggers/example-trigger.ts example-arg %user% %changelist%                                                 │
+│ 0     │ example-trigger │ change-commit │ //Engine/...      │ runtrigger exec file:///C:/P4/triggers/example-trigger.ts example-arg %user% %changelist%                                                 │
 ├───────┼─────────────────┼───────────────┼───────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ 1     │ example-trigger │ change-commit │ //Project/...     │ triggerr exec file:///C:/P4/triggers/example-trigger.ts example-arg %user% %changelist%                                                 │
+│ 1     │ example-trigger │ change-commit │ //Project/...     │ runtrigger exec file:///C:/P4/triggers/example-trigger.ts example-arg %user% %changelist%                                                 │
 └───────┴─────────────────┴───────────────┴───────────────────┴─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 ```
 
-`triggerr exec` will now safely execute the scripts when the triggers fire, write the logs to a file, and capture any result or errors.
+`runtrigger exec` will now safely execute the scripts when the triggers fire, write the logs to a file, and capture any result or errors.
 
 See `/examples` for some additional example scripts.
 
@@ -62,34 +62,34 @@ Make sure you have [Deno installed](https://docs.deno.com/runtime/manual/getting
 
 ### From GitHub
 ```sh
-deno install --name triggerr --force --allow-net --allow-read --allow-env --allow-run --allow-write --allow-sys https://raw.githubusercontent.com/runreal/triggerr/main/src/index.ts
+deno install --name runtrigger --force --allow-net --allow-read --allow-env --allow-run --allow-write --allow-sys https://raw.githubusercontent.com/runreal/runtrigger/main/src/index.ts
 ```
 ### From Source
 ```sh
-git clone https://github.com/runreal/triggerr
-deno install --name triggerr --force --allow-net --allow-read --allow-env --allow-run --allow-write --allow-sys src/index.ts
+git clone https://github.com/runreal/runtrigger
+deno install --name runtrigger --force --allow-net --allow-read --allow-env --allow-run --allow-write --allow-sys src/index.ts
 ```
 
 ## Commands
 ### `list`
 ```
-Usage:   triggerr list
+Usage:   runtrigger list
 Description:
   list current triggers
 ```
 
 ### `init`
 ```
-Usage:   triggerr init
+Usage:   runtrigger init
 Description:
-  initialize a new triggerr project
+  initialize a new runtrigger project
 Options:                                                        
   -p, --path  <path>  - Path to initialize  (Default: "./triggers/")
 ```
 
 ### `add`
 ```
-Usage:   triggerr add <script>
+Usage:   runtrigger add <script>
 Description:
   add a trigger
 Options:                                               
@@ -99,7 +99,7 @@ Options:
 
 ### `update`
 ```
-Usage:   triggerr update <script>                
+Usage:   runtrigger update <script>                
 Description:
   update a trigger
 Options:                                                 
@@ -109,14 +109,14 @@ Options:
 
 ### `rm`
 ```
-Usage:   triggerr rm <trigger-index>                   
+Usage:   runtrigger rm <trigger-index>                   
 Description:
   remove a trigger
 ```
 
 ### `exec`
 ```
-Usage:   triggerr exec <script> [args...]
+Usage:   runtrigger exec <script> [args...]
 Description:
   execute a trigger with optional arguments
 ```
