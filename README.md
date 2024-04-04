@@ -60,14 +60,11 @@ See `/examples` for some additional example scripts.
 ## Install
 Make sure you have [Deno installed](https://docs.deno.com/runtime/manual/getting_started/installation).
 
-### From GitHub
-```sh
-deno install --name runtrigger --force --allow-net --allow-read --allow-env --allow-run --allow-write --allow-sys https://raw.githubusercontent.com/runreal/runtrigger/main/src/index.ts
-```
 ### From Source
 ```sh
 git clone https://github.com/runreal/runtrigger
 deno install --name runtrigger --force --allow-net --allow-read --allow-env --allow-run --allow-write --allow-sys src/index.ts
+runtrigger --version
 ```
 
 ## Commands
