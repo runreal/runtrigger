@@ -31,7 +31,7 @@ await new Command()
 	})
 	.command('add', 'add a trigger')
 	.arguments('<script:file>')
-	.option('-d, --deno-binary <deno:file>', 'override path to the deno binary', { default: 'Deno.execPath()' })
+	.option('-d, --deno-binary <deno:file>', 'override path to the deno binary', { default: Deno.execPath() })
 	.action(async ({ denoBinary }, script) => {
 		if (script.startsWith('file://')) {
 			script = import.meta.resolve(script)
@@ -69,7 +69,7 @@ await new Command()
 	})
 	.command('update', 'update a trigger')
 	.arguments('<script:string>')
-	.option('-d, --deno-binary <deno:file>', 'override path to the deno binary', { default: 'deno' })
+	.option('-d, --deno-binary <deno:file>', 'override path to the deno binary', { default: Deno.execPath() })
 	.action(async ({ denoBinary }, script) => {
 		if (script.startsWith('file://')) {
 			script = import.meta.resolve(script)
