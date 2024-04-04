@@ -92,9 +92,8 @@ Options:
 Usage:   runtrigger add <script>
 Description:
   add a trigger
-Options:                                               
-  -e, --executable           - setup the trigger as an executable                                
-  -d, --deno-binary  <deno>  - path to the deno binary if not using executable  (Default: "deno")
+Options:                                                                        
+  -d, --deno-binary  <deno>  - override path to the deno binary (Default: "Deno.execPath()")
 ```
 
 ### `update`
@@ -102,9 +101,8 @@ Options:
 Usage:   runtrigger update <script>                
 Description:
   update a trigger
-Options:                                                 
-  -e, --executable           - setup the trigger as an executable                                
-  -d, --deno-binary  <deno>  - path to the deno binary if not using executable  (Default: "deno")
+Options:                                                                             
+  -d, --deno-binary  <deno>  - override path to the deno binary (Default: "Deno.execPath()")
 ```
 
 ### `rm`

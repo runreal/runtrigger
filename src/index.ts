@@ -31,9 +31,8 @@ await new Command()
 	})
 	.command('add', 'add a trigger')
 	.arguments('<script:file>')
-	.option('-e, --executable', 'setup the trigger as an executable')
-	.option('-d, --deno-binary <deno:file>', 'path to the deno binary if not using executable', { default: 'deno' })
-	.action(async ({ executable, denoBinary }, script) => {
+	.option('-d, --deno-binary <deno:file>', 'override path to the deno binary', { default: 'Deno.execPath()' })
+	.action(async ({ denoBinary }, script) => {
 		if (script.startsWith('file://')) {
 			script = import.meta.resolve(script)
 		} else {
@@ -45,15 +44,10 @@ await new Command()
 		const cmd = await p4.runCommandZ(`triggers`, ['-o'])
 		const triggers = p4.parseTriggersOutput(cmd.output)
 
-		let triggerCommand = ''
-		if (executable) {
-			triggerCommand = `runtrigger exec ${script} ${config.args.join(' ')}`
-		} else {
-			// We want to run this cli as the entry point
-			const cliPath = path.fromFileUrl(import.meta.url)
-			triggerCommand = `${denoBinary} run -A ${cliPath} exec ${script} ${config.args.join(' ')}`
-		}
-
+		// We want to run this cli as the entry point
+		const cliPath = path.fromFileUrl(import.meta.url)
+		const triggerCommand = `${denoBinary} run -A ${cliPath} exec ${script} ${config.args.join(' ')}`
+	
 		// Create a trigger for each type and path
 		const newTriggers: P4Trigger[] = []
 		config.type.map((type) => {
@@ -75,9 +69,8 @@ await new Command()
 	})
 	.command('update', 'update a trigger')
 	.arguments('<script:string>')
-	.option('-e, --executable', 'setup the trigger as an executable')
-	.option('-d, --deno-binary <deno:file>', 'path to the deno binary if not using executable', { default: 'deno' })
-	.action(async ({ executable, denoBinary }, script) => {
+	.option('-d, --deno-binary <deno:file>', 'override path to the deno binary', { default: 'deno' })
+	.action(async ({ denoBinary }, script) => {
 		if (script.startsWith('file://')) {
 			script = import.meta.resolve(script)
 		} else {
@@ -94,14 +87,10 @@ await new Command()
 			return
 		}
 
-		let triggerCommand = ''
-		if (executable) {
-			triggerCommand = `runtrigger exec ${script} ${config.args.join(' ')}`
-		} else {
-			// We want to run this cli as the entry point
-			const cliPath = path.fromFileUrl(import.meta.url)
-			triggerCommand = `${denoBinary} run -A ${cliPath} exec ${script} ${config.args.join(' ')}`
-		}
+		// We want to run this cli as the entry point
+		const cliPath = path.fromFileUrl(import.meta.url)
+		const triggerCommand = `${denoBinary} run -A ${cliPath} exec ${script} ${config.args.join(' ')}`
+	
 		// Create a trigger for each type and path
 		const newTriggers: P4Trigger[] = []
 		config.type.map((type) => {
