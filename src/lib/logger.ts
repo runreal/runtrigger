@@ -28,7 +28,7 @@ const randomColorForStr = (str: string): Rgb => {
 class Logger {
 	private commandContext = null as string | null
 	private sessionId = null as string | null
-	private logToFile = true
+	private logToFile = false
 	private logLevel = LogLevel.DEBUG
 	private logDir = null as string | null
 	private writeQueue: Promise<void>[] = []
