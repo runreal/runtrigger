@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/runreal/runtrigger/compare/v1.1.0...v1.2.0) (2024-04-05)
+
+
+### Features
+
+* add bootstrap install.sh ([5bf8577](https://github.com/runreal/runtrigger/commit/5bf8577eb39c62dfcd4a410d14178df17a4b590f))
+
 ## [1.1.0](https://github.com/runreal/runtrigger/compare/v1.0.0...v1.1.0) (2024-04-05)
 
 
