@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.1.0](https://github.com/runreal/runtrigger/compare/v1.0.0...v1.1.0) (2024-04-05)
+
+
+### Features
+
+* rename to runtrigger ([625c510](https://github.com/runreal/runtrigger/commit/625c5102cc276818f7b2c5c2ecee0b8a8338fbee))
+
+
+### Bug Fixes
+
+* deno path default ([dab3058](https://github.com/runreal/runtrigger/commit/dab305857c4dda5a51d005b45ff3185595ad43de))
+* disable file logging by default ([ed9c037](https://github.com/runreal/runtrigger/commit/ed9c0370f7f2ba222eaa2708f6654a6b279e0a8a))
+* remove executable option due to path issues ([727e3fc](https://github.com/runreal/runtrigger/commit/727e3fcddb533dca3e266a43fad7beb62d69fc81))
+
 ## 1.0.0 (2024-03-22)
 
 
