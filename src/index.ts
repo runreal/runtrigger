@@ -36,7 +36,7 @@ await new Command()
 		if (script.startsWith('file://')) {
 			script = import.meta.resolve(script)
 		} else {
-			script = path.toFileUrl(path.resolve(script)).toString()	
+			script = path.toFileUrl(path.resolve(script)).toString()
 		}
 		const { config }: { main: TriggerFn; config: TriggerConfig } = await import(script)
 
@@ -47,7 +47,7 @@ await new Command()
 		// We want to run this cli as the entry point
 		const cliPath = path.fromFileUrl(import.meta.url)
 		const triggerCommand = `${denoBinary} run -A ${cliPath} exec ${script} ${config.args.join(' ')}`
-	
+
 		// Create a trigger for each type and path
 		const newTriggers: P4Trigger[] = []
 		config.type.map((type) => {
@@ -74,7 +74,7 @@ await new Command()
 		if (script.startsWith('file://')) {
 			script = import.meta.resolve(script)
 		} else {
-			script = path.toFileUrl(path.resolve(script)).toString()	
+			script = path.toFileUrl(path.resolve(script)).toString()
 		}
 		const { config }: { main: TriggerFn; config: TriggerConfig } = await import(script)
 
@@ -90,7 +90,7 @@ await new Command()
 		// We want to run this cli as the entry point
 		const cliPath = path.fromFileUrl(import.meta.url)
 		const triggerCommand = `${denoBinary} run -A ${cliPath} exec ${script} ${config.args.join(' ')}`
-	
+
 		// Create a trigger for each type and path
 		const newTriggers: P4Trigger[] = []
 		config.type.map((type) => {
@@ -135,7 +135,7 @@ await new Command()
 		if (script.startsWith('file://')) {
 			script = import.meta.resolve(script)
 		} else {
-			script = path.toFileUrl(path.resolve(script)).toString()	
+			script = path.toFileUrl(path.resolve(script)).toString()
 		}
 		const { main, config }: { main: TriggerFn; config: TriggerConfig } = await import(script)
 

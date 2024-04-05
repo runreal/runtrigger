@@ -89,7 +89,9 @@ export function renderTriggerTable(triggers: P4Trigger[]): void {
 	new Table()
 		.header(Row.from(['Index', 'Name', 'Type', 'Path', 'Command']).border())
 		.body(
-			triggers.map((trigger) => new Row(trigger.index.toString(), trigger.name, trigger.type, trigger.path, trigger.command)),
+			triggers.map((trigger) =>
+				new Row(trigger.index.toString(), trigger.name, trigger.type, trigger.path, trigger.command)
+			),
 		)
 		.border(true)
 		.render()
